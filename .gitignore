@@ -1,0 +1,7 @@
+.env
+
+.Readme.md.kate-swp
+
+/volumes
+/volumes/db
+!/volumes/.keep

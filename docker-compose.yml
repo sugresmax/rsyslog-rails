@@ -1,0 +1,83 @@
+version: "3.5"
+
+services:
+  db:
+    image: postgres:15
+    container_name: rsyslog_db
+    hostname: ${DB_HOST}
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./init/db:/docker-entrypoint-initdb.d 
+      - ./volumes/db:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    networks:
+      - rsyslog
+    
+  server:
+    build: ./rsyslog-server
+    ports:
+      - "514:514/tcp"
+      - "514:514/udp"
+    restart: unless-stopped
+    tty: true
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}    
+      RSYSLOG_DB: ${RSYSLOG_DB}
+    depends_on:
+      - db
+    networks:
+      - internet
+      - rsyslog
+      
+  web:
+    image: nginx:1.25.3
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT}:80"
+    volumes:
+      - public:/public      
+      - ./init/web/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - internet
+      - rsyslog 
+    
+  app:
+    build: https://github.com/sugresmax/rails_rsyslog.git
+    container_name: rsyslog_app
+    hostname: app.rsyslog.local
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}    
+      RAILS_DB: ${RAILS_DB}
+      RSYSLOG_DB: ${RSYSLOG_DB}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}   
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    volumes:
+      - public:/rails/public
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db    
+    networks:
+      - rsyslog      
+      
+volumes:
+  public:
+      
+networks:
+  internet:
+    driver: bridge
+    name: internet
+  rsyslog:
+    internal: true
+    name: rsyslog
