@@ -18,7 +18,8 @@ Run docker compose application
 
 `docker compose up -d`
 
-When application initialized, its creates admin user with random password. You can see it in console output.
+When application initialized, its creates admin user. You can pass env `ADMIN_USER` & `ADMIN_PASSWORD` to create user.
+Otherwise user will be created with name admin and random password.
 
 After all you can connect to app by typing the `server.address:8080` in the browser.
 
