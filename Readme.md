@@ -33,15 +33,3 @@ For example, rsyslog can send logs to remote server if we specify in `/et/rsyslo
 ```
 
 More about this: https://www.rsyslog.com/doc/master/index.html
-
-
-docker run -d \
-    -v public:/rails/public \
-    -e DB_HOST=rsyslog.db.host \
-    -e DB_USER=rsyslog.db.host \
-    -e DB_PASSWORD=db-password \
-    -e RSYSLOG_DB=rsyslog-db-name \
-    -e RAILS_DB=rails-db-name \
-    -e RAILS_MASTER_KEY=191e2cae935a1bb0e4f518c6fc0c7f0a
-    -e SECRET_KEY_BASE=secret_key_base
-    -p 3000:3000 rails_rsyslog
